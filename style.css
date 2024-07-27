@@ -19,7 +19,6 @@ img {
 :root {
   --very-light-grayish-blue: hsl(236, 33%, 92%);
   --light-grayish-blue: hsl(233, 11%, 84%);
-  --light-grayish-blue-hover: hsl(236, 33%, 92%);
   --dark-grayish-blue-alt: hsl(234, 11%, 52%);
   --very-dark-grayish-blue-alt2: hsl(237, 14%, 26%);
   --blue: hsl(220, 90%, 61%);
