@@ -4,7 +4,6 @@ document.addEventListener("DOMContentLoaded", function () {
   const todoList = document.querySelector(".content ul");
   const itemsLeft = document.querySelector(".items-left span");
 
-  // Change theme based
   theme.addEventListener("change", () => {
     if (theme.checked) {
       document.body.classList.add("theme-light");
@@ -15,14 +14,12 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // Apply initial theme
   if (theme.checked) {
     document.body.classList.add("theme-light");
   } else {
     document.body.classList.add("theme-dark");
   }
 
-  // Add new task
   document.querySelector(".add-new-item span").addEventListener("click", () => {
     if (newItemInput.value.length > 0) {
       createNewTodoItem(newItemInput.value);
@@ -30,7 +27,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // Add new task on Enter key press
   newItemInput.addEventListener("keypress", (e) => {
     if (e.charCode === 13 && newItemInput.value.length > 0) {
       createNewTodoItem(newItemInput.value);
@@ -47,8 +43,7 @@ document.addEventListener("DOMContentLoaded", function () {
           <input type="checkbox" name="todoItem">
           <span class="checkmark"></span>
           <span class="text">${text}</span>
-          </label>
-          <button class="edit">Edit</button>
+        </label>
         <span class="remove"></span>
       `;
 
@@ -123,24 +118,4 @@ document.addEventListener("DOMContentLoaded", function () {
         break;
     }
   }
-
-  // Edit a to-do item
-  function editTodoItem(item) {
-    const textSpan = item.querySelector(".text");
-    const newText = prompt("Edit task", textSpan.innerText);
-
-    if (newText !== null) {
-      textSpan.innerText = newText;
-      saveTasks();
-    }
-  }
-
-  // Removing and editing tasks
-  todoList.addEventListener("click", (event) => {
-    if (event.target.classList.contains("remove")) {
-      removeTodoItem(event.target.parentElement);
-    } else if (event.target.classList.contains("edit")) {
-      editTodoItem(event.target.parentElement.parentElement);
-    }
-  });
 });
