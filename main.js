@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const todoList = document.querySelector(".content ul");
   const itemsLeft = document.querySelector(".items-left span");
 
+  // 
   theme.addEventListener("change", () => {
     if (theme.checked) {
       document.body.classList.add("theme-light");
