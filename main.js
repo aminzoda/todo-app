@@ -38,17 +38,26 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  function createNewTodoItem(text) {
+  function createNewTodoItem(text, priority = "medium", isChecked = false) {
     const elem = document.createElement("li");
     elem.classList.add("flex-row");
 
     elem.innerHTML = `
         <label class="list-item">
-          <input type="checkbox" name="todoItem">
+          <input type="checkbox" name="todoItem" ${isChecked ? "checked" : ""}>
           <span class="checkmark"></span>
           <span class="text">${text}</span>
-          </label>
-          <button class="edit">Edit</button>
+          <select class="priority">
+       <option value="low" ${priority === "low" ? "selected" : ""}>Low</option>
+       <option value="medium" ${
+         priority === "medium" ? "selected" : ""
+       }>Medium</option>
+       <option value="high" ${
+         priority === "high" ? "selected" : ""
+       }>High</option>
+     </select>
+     </label>
+     <button class="edit">Edit</button>
         <span class="remove"></span>
       `;
 
@@ -155,8 +164,9 @@ document.addEventListener("DOMContentLoaded", function () {
     todoList.querySelectorAll("li").forEach((item) => {
       const text = item.querySelector(".text").innerText;
       const isChecked = item.querySelector("input[type='checkbox']").checked;
+      const priority = item.querySelector(".priority").value;
 
-      tasks.push({ text, isChecked });
+      tasks.push({ text, isChecked, priority });
     });
 
     localStorage.setItem("tasks", JSON.stringify(tasks));

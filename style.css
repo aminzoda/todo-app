@@ -213,6 +213,18 @@ ul li input[type="checkbox"]:checked ~ .text {
   text-decoration: line-through;
 }
 
+.priority {
+  width: 80px;
+  height: auto;
+  border: none;
+  border-radius: 5px;
+  background-color: var(--dark-grayish-blue-alt);
+  padding: 4px;
+  color: #fff;
+  letter-spacing: 1px;
+  font-weight: bold;
+}
+
 .remove {
   background: url("images/icon-cross.svg");
   background-repeat: no-repeat;
@@ -226,8 +238,7 @@ ul li input[type="checkbox"]:checked ~ .text {
 }
 
 .edit {
-  margin-left: 10rem;
-  margin-top: 4px;
+  margin-left: 1rem;
   width: 80px;
   height: auto;
   border: none;
@@ -242,6 +253,7 @@ ul li input[type="checkbox"]:checked ~ .text {
 
 .edit:hover {
   background-color: var(--light-grayish-blue);
+  color: var(--blue);
 }
 
 ul li:hover .remove {
