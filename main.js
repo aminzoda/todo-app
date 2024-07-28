@@ -61,29 +61,34 @@ document.addEventListener("DOMContentLoaded", function () {
 
     todoList.append(elem);
     updateItemsCount(1);
+
+    // Save tasks to localStorage
+    saveTasks();
   }
 
+  // Update the count of items left
   function updateItemsCount(number) {
     itemsLeft.innerText = +itemsLeft.innerText + number;
   }
 
+  // Remove a to-do item
   function removeTodoItem(elem) {
     elem.remove();
     updateItemsCount(-1);
+    saveTasks();
   }
 
-  todoList.addEventListener("click", (event) => {
-    if (event.target.classList.contains("remove")) {
-      removeTodoItem(event.target.parentElement);
-    }
-  });
+  // Save tasks when any change occurs in the task list
+  todoList.addEventListener("change", saveTasks);
 
+  // Clear completed tasks
   document.querySelector(".clear").addEventListener("click", () => {
     document
       .querySelectorAll('ul li input[type="checkbox"]:checked')
       .forEach((item) => {
         removeTodoItem(item.closest("li"));
       });
+    saveTasks();
   });
 
   document.querySelectorAll(".filter input").forEach((radio) => {
@@ -143,4 +148,31 @@ document.addEventListener("DOMContentLoaded", function () {
       editTodoItem(event.target.parentElement.parentElement);
     }
   });
+
+  // Save tasks to localStorage
+  function saveTasks() {
+    const tasks = [];
+    todoList.querySelectorAll("li").forEach((item) => {
+      const text = item.querySelector(".text").innerText;
+      const isChecked = item.querySelector("input[type='checkbox']").checked;
+
+      tasks.push({ text, isChecked });
+    });
+
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+  }
+
+  // Load tasks from localStorage
+  function loadTasks() {
+    const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+    tasks.forEach((task) => {
+      createNewTodoItem(task.text, task.priority, task.isChecked);
+    });
+
+    updateItemsCount(tasks.length);
+  }
+
+  // Load stored tasks from localStorage
+  loadTasks();
 });
