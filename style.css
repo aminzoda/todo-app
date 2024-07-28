@@ -226,7 +226,7 @@ ul li input[type="checkbox"]:checked ~ .text {
 }
 
 .edit {
-  margin-left: 20rem;
+  margin-left: 10rem;
   margin-top: 4px;
   width: 80px;
   height: auto;
