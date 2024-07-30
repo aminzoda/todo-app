@@ -82,6 +82,15 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       todoList.append(elem);
+
+      elem.querySelector(".remove").addEventListener("click", (event) => {
+        const index = event.target.dataset.index;
+        removeTask(index);
+      });
+      elem.querySelector(".edit").addEventListener("click", (event) => {
+        const index = event.target.dataset.index;
+        editTask(index);
+      });
     });
     itemsLeft.innerText = tasks.filter((task) => !task.isChecked).length;
   }
@@ -144,16 +153,6 @@ document.addEventListener("DOMContentLoaded", function () {
       saveTasks();
     }
   }
-
-  // Removing and editing tasks
-  todoList.addEventListener("click", (event) => {
-    const index = event.target.dataset.index;
-    if (event.target.classList.contains("remove")) {
-      removeTask(index);
-    } else if (event.target.classList.contains("edit")) {
-      editTask(index);
-    }
-  });
 
   // Save tasks to localStorage
   function saveTasks() {
