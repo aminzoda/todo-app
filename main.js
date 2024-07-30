@@ -3,7 +3,11 @@ document.addEventListener("DOMContentLoaded", function () {
   const newItemInput = document.getElementById("addItem");
   const todoList = document.querySelector(".content ul");
   const itemsLeft = document.querySelector(".items-left span");
+  const addNewItemButton = document.querySelector(".add-new-item");
+  const clearButton = document.querySelector(".clear");
+  const filterRadios = document.querySelectorAll(".filter input");
 
+  let tasks = [];
   // Change theme based
   theme.addEventListener("change", () => {
     if (theme.checked) {
@@ -23,58 +27,69 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // Add new task
-  document.querySelector(".add-new-item span").addEventListener("click", () => {
+  addNewItemButton.addEventListener("click", () => {
     if (newItemInput.value.length > 0) {
-      createNewTodoItem(newItemInput.value);
+      addTask(newItemInput.value, false);
       newItemInput.value = "";
     }
   });
 
   // Add new task on Enter key press
-  newItemInput.addEventListener("keypress", (e) => {
-    if (e.charCode === 13 && newItemInput.value.length > 0) {
-      createNewTodoItem(newItemInput.value);
+  newItemInput.addEventListener("keypress", (event) => {
+    if (event.charCode === 13 && newItemInput.value.length > 0) {
+      addTask(newItemInput.value, false);
       newItemInput.value = "";
     }
   });
 
-  function createNewTodoItem(text) {
-    const elem = document.createElement("li");
-    elem.classList.add("flex-row");
-
-    elem.innerHTML = `
-        <label class="list-item">
-          <input type="checkbox" name="todoItem">
-          <span class="checkmark"></span>
-          <span class="text">${text}</span>
-          </label>
-          <button class="edit">Edit</button>
-        <span class="remove"></span>
-      `;
-
-    if (
-      document.querySelector('.filter input[type="radio"]:checked').id ===
-      "completed"
-    ) {
-      elem.classList.add("hidden");
-    }
-
-    todoList.append(elem);
-    updateItemsCount(1);
-
-    // Save tasks to localStorage
+  function addTask(text, isChecked) {
+    const task = { text, isChecked };
+    tasks.push(task);
+    createNewTodoItem();
     saveTasks();
   }
 
-  // Update the count of items left
-  function updateItemsCount(number) {
-    itemsLeft.innerText = +itemsLeft.innerText + number;
+  function createNewTodoItem() {
+    todoList.innerHTML = "";
+    tasks.forEach((task, index) => {
+      const elem = document.createElement("li");
+      elem.classList.add("flex-row");
+
+      elem.innerHTML = `
+          <label class="list-item">
+            <input type="checkbox" name="todoItem" ${
+              task.isChecked ? "checked" : ""
+            } data-index="${index}">
+            <span class="checkmark"></span>
+            <span class="text">${task.text}</span>
+            </label>
+            <button class="edit" data-index="${index}">Edit</button>
+          <span class="remove" data-index="${index}"></span>
+        `;
+
+      if (
+        document.querySelector('.filter input[type="radio"]:checked').id ===
+          "completed" &&
+        !task.isChecked
+      ) {
+        elem.classList.add("hidden");
+      } else if (
+        document.querySelector('.filter input[type="radio"]:checked').id ===
+          "active" &&
+        task.isChecked
+      ) {
+        elem.classList.add("hidden");
+      }
+
+      todoList.append(elem);
+    });
+    itemsLeft.innerText = tasks.filter((task) => !task.isChecked).length;
   }
 
   // Remove a to-do item
-  function removeTodoItem(elem) {
-    elem.remove();
-    updateItemsCount(-1);
+  function removeTask(index) {
+    tasks.splice(index, 1);
+    createNewTodoItem();
     saveTasks();
   }
 
@@ -82,19 +97,10 @@ document.addEventListener("DOMContentLoaded", function () {
   todoList.addEventListener("change", saveTasks);
 
   // Clear completed tasks
-  document.querySelector(".clear").addEventListener("click", () => {
-    document
-      .querySelectorAll('ul li input[type="checkbox"]:checked')
-      .forEach((item) => {
-        removeTodoItem(item.closest("li"));
-      });
+  clearButton.addEventListener("click", () => {
+    tasks = tasks.filter((task) => !task.isChecked);
+    createNewTodoItem();
     saveTasks();
-  });
-
-  document.querySelectorAll(".filter input").forEach((radio) => {
-    radio.addEventListener("change", (e) => {
-      filterTodoItems(e.target.id);
-    });
   });
 
   function filterTodoItems(id) {
@@ -130,49 +136,51 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // Edit a to-do item
-  function editTodoItem(item) {
-    const textSpan = item.querySelector(".text");
-    const newText = prompt("Edit task", textSpan.innerText);
-
+  function editTask(index) {
+    const newText = prompt("Edit task", tasks[index].text);
     if (newText !== null) {
-      textSpan.innerText = newText;
+      tasks[index].text = newText;
+      createNewTodoItem();
       saveTasks();
     }
   }
 
   // Removing and editing tasks
   todoList.addEventListener("click", (event) => {
+    const index = event.target.dataset.index;
     if (event.target.classList.contains("remove")) {
-      removeTodoItem(event.target.parentElement);
+      removeTask(index);
     } else if (event.target.classList.contains("edit")) {
-      editTodoItem(event.target.parentElement.parentElement);
+      editTask(index);
     }
   });
 
   // Save tasks to localStorage
   function saveTasks() {
-    const tasks = [];
-    todoList.querySelectorAll("li").forEach((item) => {
-      const text = item.querySelector(".text").innerText;
-      const isChecked = item.querySelector("input[type='checkbox']").checked;
-
-      tasks.push({ text, isChecked });
-    });
-
     localStorage.setItem("tasks", JSON.stringify(tasks));
   }
 
   // Load tasks from localStorage
   function loadTasks() {
-    const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-
-    tasks.forEach((task) => {
-      createNewTodoItem(task.text, task.priority, task.isChecked);
-    });
-
-    updateItemsCount(tasks.length);
+    tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+    createNewTodoItem();
   }
 
   // Load stored tasks from localStorage
   loadTasks();
+
+  // Changes in checkbox todo list
+  todoList.addEventListener("change", (event) => {
+    const index = event.target.dataset.index;
+    tasks[index].isChecked = event.target.checked;
+    createNewTodoItem();
+    saveTasks();
+  });
+
+  // Filter tasks
+  filterRadios.forEach((radio) => {
+    radio.addEventListener("change", (e) => {
+      filterTodoItems(e.target.id);
+    });
+  });
 });
