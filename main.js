@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
+  // Initial setup
   const theme = document.getElementById("theme");
   const newItemInput = document.getElementById("addItem");
   const todoList = document.querySelector(".content ul");
@@ -8,8 +9,16 @@ document.addEventListener("DOMContentLoaded", function () {
   const filterRadios = document.querySelectorAll(".filter input");
 
   let tasks = [];
-  // Change theme based
-  theme.addEventListener("change", () => {
+
+  // Initialize application state
+  function init() {
+    applyInitialTheme();
+    loadTasks();
+    bindEvents();
+  }
+
+  // Theme functions
+  function applyInitialTheme() {
     if (theme.checked) {
       document.body.classList.add("theme-light");
       document.body.classList.remove("theme-dark");
@@ -17,117 +26,115 @@ document.addEventListener("DOMContentLoaded", function () {
       document.body.classList.add("theme-dark");
       document.body.classList.remove("theme-light");
     }
-  });
-
-  // Apply initial theme
-  if (theme.checked) {
-    document.body.classList.add("theme-light");
-  } else {
-    document.body.classList.add("theme-dark");
   }
 
-  // Add new task
-  addNewItemButton.addEventListener("click", () => {
-    if (newItemInput.value.length > 0) {
-      addTask(newItemInput.value, false);
-      newItemInput.value = "";
+  function toggleTheme() {
+    if (theme.checked) {
+      document.body.classList.add("theme-light");
+      document.body.classList.remove("theme-dark");
+    } else {
+      document.body.classList.add("theme-dark");
+      document.body.classList.remove("theme-light");
     }
-  });
+  }
 
-  // Add new task on Enter key press
-  newItemInput.addEventListener("keypress", (event) => {
-    if (event.charCode === 13 && newItemInput.value.length > 0) {
-      addTask(newItemInput.value, false);
-      newItemInput.value = "";
-    }
-  });
-
+  // Task functions
   function addTask(text, isChecked) {
     const task = { text, isChecked };
     tasks.push(task);
-    createNewTodoItem();
+    render();
     saveTasks();
   }
 
-  function createNewTodoItem() {
+  function removeTask(index) {
+    tasks.splice(index, 1);
+    render();
+    saveTasks();
+  }
+
+  function editTask(index) {
+    const newText = prompt("Edit task", tasks[index].text);
+    if (newText !== null) {
+      tasks[index].text = newText;
+      render();
+      saveTasks();
+    }
+  }
+
+  function clearCompletedTasks() {
+    tasks = tasks.filter((task) => !task.isChecked);
+    render();
+    saveTasks();
+  }
+
+  function loadTasks() {
+    tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+    render();
+  }
+
+  function saveTasks() {
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+  }
+
+  function render() {
     todoList.innerHTML = "";
     tasks.forEach((task, index) => {
       const elem = document.createElement("li");
       elem.classList.add("flex-row");
 
       elem.innerHTML = `
-          <label class="list-item">
-            <input type="checkbox" name="todoItem" ${
-              task.isChecked ? "checked" : ""
-            } data-index="${index}">
-            <span class="checkmark"></span>
-            <span class="text">${task.text}</span>
-            </label>
-            <button class="edit" data-index="${index}">Edit</button>
-          <span class="remove" data-index="${index}"></span>
-        `;
+        <label class="list-item">
+          <input type="checkbox" name="todoItem" ${task.isChecked ? "checked" : ""} data-index="${index}">
+          <span class="checkmark"></span>
+          <span class="text">${task.text}</span>
+        </label>
+        <button class="edit" data-index="${index}">Edit</button>
+        <span class="remove" data-index="${index}"></span>
+      `;
 
-      if (
-        document.querySelector('.filter input[type="radio"]:checked').id ===
-          "completed" &&
-        !task.isChecked
-      ) {
-        elem.classList.add("hidden");
-      } else if (
-        document.querySelector('.filter input[type="radio"]:checked').id ===
-          "active" &&
-        task.isChecked
-      ) {
-        elem.classList.add("hidden");
-      }
-
+      filterTasks(elem, task);
       todoList.append(elem);
+
+      elem.querySelector(".remove").addEventListener("click", (event) => {
+        removeTask(event.target.dataset.index);
+      });
+
+      elem.querySelector(".edit").addEventListener("click", (event) => {
+        editTask(event.target.dataset.index);
+      });
     });
     itemsLeft.innerText = tasks.filter((task) => !task.isChecked).length;
   }
 
-  // Remove a to-do item
-  function removeTask(index) {
-    tasks.splice(index, 1);
-    createNewTodoItem();
-    saveTasks();
+  function filterTasks(elem, task) {
+    const filterId = document.querySelector('.filter input[type="radio"]:checked').id;
+
+    if (filterId === "completed" && !task.isChecked) {
+      elem.classList.add("hidden");
+    } else if (filterId === "active" && task.isChecked) {
+      elem.classList.add("hidden");
+    }
   }
-
-  // Save tasks when any change occurs in the task list
-  todoList.addEventListener("change", saveTasks);
-
-  // Clear completed tasks
-  clearButton.addEventListener("click", () => {
-    tasks = tasks.filter((task) => !task.isChecked);
-    createNewTodoItem();
-    saveTasks();
-  });
 
   function filterTodoItems(id) {
     const allItems = todoList.querySelectorAll("li");
 
     switch (id) {
       case "all":
-        allItems.forEach((item) => {
-          item.classList.remove("hidden");
-        });
+        allItems.forEach((item) => item.classList.remove("hidden"));
         break;
       case "active":
         allItems.forEach((item) => {
-          if (item.querySelector("input").checked) {
-            item.classList.add("hidden");
-          } else {
-            item.classList.remove("hidden");
-          }
+          item.querySelector("input").checked
+              ? item.classList.add("hidden")
+              : item.classList.remove("hidden");
         });
         break;
       case "completed":
         allItems.forEach((item) => {
-          if (item.querySelector("input").checked) {
-            item.classList.remove("hidden");
-          } else {
-            item.classList.add("hidden");
-          }
+          item.querySelector("input").checked
+              ? item.classList.remove("hidden")
+              : item.classList.add("hidden");
         });
         break;
       default:
@@ -135,52 +142,40 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  // Edit a to-do item
-  function editTask(index) {
-    const newText = prompt("Edit task", tasks[index].text);
-    if (newText !== null) {
-      tasks[index].text = newText;
-      createNewTodoItem();
-      saveTasks();
-    }
-  }
+  // Event binding functions
+  function bindEvents() {
+    theme.addEventListener("change", toggleTheme);
 
-  // Removing and editing tasks
-  todoList.addEventListener("click", (event) => {
-    const index = event.target.dataset.index;
-    if (event.target.classList.contains("remove")) {
-      removeTask(index);
-    } else if (event.target.classList.contains("edit")) {
-      editTask(index);
-    }
-  });
-
-  // Save tasks to localStorage
-  function saveTasks() {
-    localStorage.setItem("tasks", JSON.stringify(tasks));
-  }
-
-  // Load tasks from localStorage
-  function loadTasks() {
-    tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-    createNewTodoItem();
-  }
-
-  // Load stored tasks from localStorage
-  loadTasks();
-
-  // Changes in checkbox todo list
-  todoList.addEventListener("change", (event) => {
-    const index = event.target.dataset.index;
-    tasks[index].isChecked = event.target.checked;
-    createNewTodoItem();
-    saveTasks();
-  });
-
-  // Filter tasks
-  filterRadios.forEach((radio) => {
-    radio.addEventListener("change", (e) => {
-      filterTodoItems(e.target.id);
+    addNewItemButton.addEventListener("click", () => {
+      if (newItemInput.value.length > 0) {
+        addTask(newItemInput.value, false);
+        newItemInput.value = "";
+      }
     });
-  });
+
+    newItemInput.addEventListener("keypress", (event) => {
+      if (event.charCode === 13 && newItemInput.value.length > 0) {
+        addTask(newItemInput.value, false);
+        newItemInput.value = "";
+      }
+    });
+
+    clearButton.addEventListener("click", clearCompletedTasks);
+
+    todoList.addEventListener("change", (event) => {
+      const index = event.target.dataset.index;
+      tasks[index].isChecked = event.target.checked;
+      render();
+      saveTasks();
+    });
+
+    filterRadios.forEach((radio) => {
+      radio.addEventListener("change", (e) => {
+        filterTodoItems(e.target.id);
+      });
+    });
+  }
+
+  // Initialize the application
+  init();
 });
