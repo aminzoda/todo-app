@@ -96,11 +96,20 @@ document.addEventListener("DOMContentLoaded", function () {
       todoList.append(elem);
 
       elem.querySelector(".remove").addEventListener("click", (event) => {
+<<<<<<< HEAD
         removeTask(event.target.dataset.index);
       });
 
       elem.querySelector(".edit").addEventListener("click", (event) => {
         editTask(event.target.dataset.index);
+=======
+        const index = event.target.dataset.index;
+        removeTask(index);
+      });
+      elem.querySelector(".edit").addEventListener("click", (event) => {
+        const index = event.target.dataset.index;
+        editTask(index);
+>>>>>>> b7fc4dae2cc715a15de7ad1b519e497cfb45c29a
       });
     });
     itemsLeft.innerText = tasks.filter((task) => !task.isChecked).length;
@@ -146,11 +155,40 @@ document.addEventListener("DOMContentLoaded", function () {
   function bindEvents() {
     theme.addEventListener("change", toggleTheme);
 
+<<<<<<< HEAD
     addNewItemButton.addEventListener("click", () => {
       if (newItemInput.value.length > 0) {
         addTask(newItemInput.value, false);
         newItemInput.value = "";
       }
+=======
+  // Save tasks to localStorage
+  function saveTasks() {
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+  }
+
+  // Load tasks from localStorage
+  function loadTasks() {
+    tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+    createNewTodoItem();
+  }
+
+  // Load stored tasks from localStorage
+  loadTasks();
+
+  // Changes in checkbox todo list
+  todoList.addEventListener("change", (event) => {
+    const index = event.target.dataset.index;
+    tasks[index].isChecked = event.target.checked;
+    createNewTodoItem();
+    saveTasks();
+  });
+
+  // Filter tasks
+  filterRadios.forEach((radio) => {
+    radio.addEventListener("change", (e) => {
+      filterTodoItems(e.target.id);
+>>>>>>> b7fc4dae2cc715a15de7ad1b519e497cfb45c29a
     });
 
     newItemInput.addEventListener("keypress", (event) => {
