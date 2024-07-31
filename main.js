@@ -128,6 +128,7 @@ document.addEventListener("DOMContentLoaded", function () {
       elem.querySelector("input[type='checkbox']").addEventListener("change", (event) => {
         tasks[index].isChecked = event.target.checked;
         saveTasks();
+        render();
       });
 
       filterTasks(elem, task);
