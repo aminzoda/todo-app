@@ -207,7 +207,7 @@ ul li input[type="checkbox"] ~ .checkmark:hover::before {
 
 ul li input[type="checkbox"]:checked ~ .checkmark {
   background: center url("images/icon-check.svg") no-repeat,
-    linear-gradient(135deg, hsl(192, 100%, 67%), hsl(280, 87%, 65%));
+grey;
 }
 
 ul li input[type="checkbox"]:checked ~ .text {
@@ -227,17 +227,50 @@ ul li input[type="checkbox"]:checked ~ .text {
 }
 
 .edit {
-  margin: 0 1rem;
-  width: 80px;
-  height: auto;
-  border: 1px solid #ccc;
+  position: relative;
+  width: 100px;
+  height: 32px;
+  padding-top: 5px;
   border-radius: 5px;
-  background-color: white;
-  color: #fff;
+  border: 1px solid #ccc;
+  margin: 5px 10px;
+  text-align: center;
+  background: white;
+  cursor: pointer;
+}
+.edit::after {
+  content: "";
+  display: block;
+  position: absolute;
+  right: 40px;
+  top: 3px;
+  width: 22px;
+  height: 22px;
+  background-image: url("images/pen.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  font-size: 16px;
+}
+
+
+.add {
+  display: none;
+}
+
+.edit:hover::after {
+  display: none;
+}
+
+.edit:hover .add {
+  display: block;
+}
+
+.edit:hover {
+  background-color: var(--light-grayish-blue);
+  color: blue;
   text-transform: uppercase;
   letter-spacing: 3px;
   font-weight: bold;
-  padding: 8px;
 }
 
 .custom-dropdown {
@@ -255,6 +288,7 @@ ul li input[type="checkbox"]:checked ~ .text {
   gap: 12px;
   align-items: center;
   background: white;
+  color: blue;
 }
 
 .dropdown-options {
@@ -263,6 +297,7 @@ ul li input[type="checkbox"]:checked ~ .text {
   border: 1px solid #ccc;
   z-index: 10;
   width: 100%;
+  color: black;
 }
 
 .dropdown-option {
@@ -279,26 +314,6 @@ ul li input[type="checkbox"]:checked ~ .text {
 
 .hidden {
   display: none;
-}
-
-.priority-low {
-  color: blue;
-}
-
-.priority-medium {
-  color: #faa80c;
-}
-
-.priority-high {
-  color: red;
-}
-
-.priority-none{
-  color: grey;
-}
-
-.edit:hover {
-  background-color: var(--light-grayish-blue);
 }
 
 ul li:hover .remove {
