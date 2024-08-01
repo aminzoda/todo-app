@@ -16,6 +16,7 @@ document.addEventListener("DOMContentLoaded", function () {
   };
   const priorities = ["high", "medium", "low", "none"];
   let tasks = [];
+  let openDropdown = null;
 
   // Initialize application state
   function init() {
@@ -104,14 +105,12 @@ document.addEventListener("DOMContentLoaded", function () {
       elem.innerHTML = `
       <label class="list-item">
         <input type="checkbox" name="todoItem" ${task.isChecked ? "checked" : ""} data-index="${index}">
-        <span class="checkmark" style="background-color: ${colors[task.priority]}""></span>
+        <span class="checkmark" style="background-color: ${colors[task.priority]}" title="checkbox"></span>
         <span class="text">${task.text}</span>
       </label>
-      <button class="edit" data-index="${index}">
-         <span class="add">Edit</span>
-      </button>
-      <span class="remove" data-index="${index}"></span>
-      <div class="custom-dropdown">
+      <button class="edit" data-index="${index}" title="Edit task"></button>
+      <span class="remove" data-index="${index}" title="Remove task"></span>
+      <div class="custom-dropdown" title="Set priority">
         <div class="selected-priority">${getPriorityIcon(task.priority)} ${task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}</div>
         <div class="dropdown-options hidden">
           ${priorities.map(priority => `
@@ -134,9 +133,21 @@ document.addEventListener("DOMContentLoaded", function () {
         editTask(index);
       });
 
-      elem.querySelector(".selected-priority").addEventListener("click", () => {
+      elem.querySelector(".selected-priority").addEventListener("click", (event) => {
         const options = elem.querySelector(".dropdown-options");
+
+        // Close the previously open dropdown if it exists
+        if (openDropdown && openDropdown !== options) {
+          openDropdown.classList.add("hidden");
+        }
+
+        // Toggle the current dropdown
         options.classList.toggle("hidden");
+
+        // Update the reference to the currently open dropdown
+        openDropdown = options.classList.contains("hidden") ? null : options;
+
+        event.stopPropagation(); // Prevent the document click handler from immediately closing the dropdown
       });
 
       elem.querySelectorAll(".dropdown-option").forEach(option => {
@@ -162,7 +173,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
     itemsLeft.innerText = tasks.filter((task) => !task.isChecked).length;
   }
-
 
   function filterTasks(elem, task) {
     const filterId = document.querySelector('.filter input[type="radio"]:checked').id;
@@ -224,6 +234,15 @@ document.addEventListener("DOMContentLoaded", function () {
       radio.addEventListener("change", (e) => {
         filterTodoItems(e.target.id);
       });
+    });
+
+    // Close custom dropdown when clicking outside
+    document.addEventListener("click", (event) => {
+      const isDropdown = event.target.closest(".custom-dropdown");
+      if (!isDropdown && openDropdown) {
+        openDropdown.classList.add("hidden");
+        openDropdown = null;
+      }
     });
   }
 
