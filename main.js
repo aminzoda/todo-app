@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const clearButton = document.querySelector(".clear");
   const filterRadios = document.querySelectorAll(".filter input");
 
-  const priorities = ["low", "medium", "high"];
+  const priorities = ["high", "medium", "low", "none"];
   let tasks = [];
 
   // Initialize application state
@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // Task functions
-  function addTask(text, isChecked, priority = "low") {
+  function addTask(text, isChecked, priority = "none") {
     const task = { text, isChecked, priority };
     tasks.push(task);
     render();
@@ -77,16 +77,18 @@ document.addEventListener("DOMContentLoaded", function () {
     localStorage.setItem("tasks", JSON.stringify(tasks));
   }
 
-  // Generate option
-  function generatePriorityOptions(selectedPriority) {
-    return priorities
-        .map(
-            (priority) =>
-                `<option value="${priority}" ${
-                    priority === selectedPriority ? "selected" : ""
-                }>${priority.charAt(0).toUpperCase() + priority.slice(1)}</option>`
-        )
-        .join("");
+  // Function to get SVG icon
+  function getPriorityIcon(priority) {
+    const colors = {
+      high: "red",
+      medium: "#faa80c",
+      low: "blue",
+      none: "grey"
+    };
+    return `
+    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">
+      <path d="M220-100v-760h40v80h550.77l-72.31 180 72.31 180H260v320h-40Z" fill="${colors[priority]}"/>
+    </svg>`;
   }
 
   function render() {
@@ -97,17 +99,24 @@ document.addEventListener("DOMContentLoaded", function () {
       const priorityClass = `priority-${task.priority}`;
 
       elem.innerHTML = `
-      <label class="list-item ${priorityClass}">
-        <input type="checkbox" name="todoItem" ${task.isChecked ? "checked" : ""} data-index="${index}">
-        <span class="checkmark"></span>
-        <span class="text">${task.text}</span>
-      </label>
-      <button class="edit" data-index="${index}">Edit</button>
-      <span class="remove" data-index="${index}"></span>
-      <select class="priority ${priorityClass}">
-        ${generatePriorityOptions(task.priority)}
-      </select>
-    `;
+        <label class="list-item">
+          <input type="checkbox" name="todoItem" ${task.isChecked ? "checked" : ""} data-index="${index}">
+          <span class="checkmark"></span>
+          <span class="text">${task.text}</span>
+        </label>
+        <button class="edit ${priorityClass}" data-index="${index}">Edit</button>
+        <span class="remove" data-index="${index}"></span>
+        <div class="custom-dropdown">
+          <div class="selected-priority ${priorityClass}">${getPriorityIcon(task.priority)} ${task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}</div>
+          <div class="dropdown-options hidden">
+            ${priorities.map(priority => `
+              <div class="dropdown-option" data-value="${priority}">
+                ${getPriorityIcon(priority)} ${priority.charAt(0).toUpperCase() + priority.slice(1)}
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
 
       todoList.appendChild(elem);
 
@@ -119,10 +128,23 @@ document.addEventListener("DOMContentLoaded", function () {
         editTask(event.target.dataset.index);
       });
 
-      elem.querySelector(".priority").addEventListener("change", (event) => {
-        tasks[index].priority = event.target.value;
-        saveTasks();
-        render();
+      elem.querySelector(".selected-priority").addEventListener("click", () => {
+        const options = elem.querySelector(".dropdown-options");
+        options.classList.toggle("hidden");
+      });
+
+      elem.querySelectorAll(".dropdown-option").forEach(option => {
+        option.addEventListener("click", (event) => {
+          const selectedValue = event.currentTarget.dataset.value;
+          tasks[index].priority = selectedValue;
+
+          // Update the displayed selected priority and icon
+          const selectedPriorityDiv = elem.querySelector(".selected-priority");
+          selectedPriorityDiv.innerHTML = `${getPriorityIcon(selectedValue)} ${selectedValue.charAt(0).toUpperCase() + selectedValue.slice(1)}`;
+
+          saveTasks();
+          render();
+        });
       });
 
       elem.querySelector("input[type='checkbox']").addEventListener("change", (event) => {
@@ -135,7 +157,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
     itemsLeft.innerText = tasks.filter((task) => !task.isChecked).length;
   }
-
 
   function filterTasks(elem, task) {
     const filterId = document.querySelector('.filter input[type="radio"]:checked').id;

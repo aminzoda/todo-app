@@ -227,29 +227,58 @@ ul li input[type="checkbox"]:checked ~ .text {
 }
 
 .edit {
-  margin-left: 1rem;
-  margin-top: 4px;
+  margin: 0 1rem;
   width: 80px;
   height: auto;
-  border: none;
+  border: 1px solid #ccc;
   border-radius: 5px;
-  background-color: var(--dark-grayish-blue-alt);
+  background-color: white;
   color: #fff;
   text-transform: uppercase;
   letter-spacing: 3px;
   font-weight: bold;
-  padding: 4px;
+  padding: 8px;
 }
 
-.priority{
-  margin-left: 1rem;
-  margin-top: 4px;
-  width: 80px;
-  height: auto;
-  border: none;
+.custom-dropdown {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  width: 130px;
+}
+
+.selected-priority {
+  padding: 4px 12px;
+  display: flex;
+  border: 1px solid #ccc;
   border-radius: 5px;
-  background-color: var(--dark-grayish-blue-alt);
-  padding: 4px;
+  gap: 12px;
+  align-items: center;
+  background: white;
+}
+
+.dropdown-options {
+  position: absolute;
+  background: #fff;
+  border: 1px solid #ccc;
+  z-index: 10;
+  width: 100%;
+}
+
+.dropdown-option {
+  cursor: pointer;
+  padding: 4px 12px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.dropdown-option:hover {
+  background-color: #f0f0f0;
+}
+
+.hidden {
+  display: none;
 }
 
 .priority-low {
@@ -257,11 +286,15 @@ ul li input[type="checkbox"]:checked ~ .text {
 }
 
 .priority-medium {
-  color: yellow;
+  color: #faa80c;
 }
 
 .priority-high {
   color: red;
+}
+
+.priority-none{
+  color: grey;
 }
 
 .edit:hover {
