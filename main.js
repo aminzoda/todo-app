@@ -60,9 +60,13 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function editTask(index) {
-    const newText = prompt("Edit task", tasks[index].text);
+    const task = tasks[index];
+    if (!task) {
+      return;
+    }
+    const newText = prompt("Edit task", task.text);
     if (newText !== null) {
-      tasks[index].text = newText;
+      task.text = newText;
       render();
       saveTasks();
     }
@@ -126,7 +130,8 @@ document.addEventListener("DOMContentLoaded", function () {
       });
 
       elem.querySelector(".edit").addEventListener("click", (event) => {
-        editTask(+event.target.dataset.index);
+        const index = parseInt(event.target.dataset.index);
+        editTask(index);
       });
 
       elem.querySelector(".selected-priority").addEventListener("click", () => {
