@@ -30,7 +30,7 @@ img {
   --todo-bg: hsl(235, 24%, 19%);
   --todo-shadow: hsl(235, 21%, 11%);
   --font-color: hsl(234, 39%, 85%);
-  --font-color-hover: #f0f0f0;
+  --font-color-hover: hsl(234, 25%, 23%);
 }
 
 .theme-light {
@@ -38,7 +38,7 @@ img {
   --todo-bg: hsl(0, 0%, 98%);
   --todo-shadow: hsl(235, 19%, 35%);
   --font-color: hsl(236, 9%, 61%);
-  --font-color-hover: hsl(235, 21%, 11%);
+  --font-color-hover: hsl(0, 0%, 73%);
 }
 
 body {
@@ -226,34 +226,73 @@ ul li input[type="checkbox"]:checked ~ .text {
   top: 25px;
 }
 
-.edit {
-  position: relative;
-  width: 100px;
-  height: 32px;
-  padding-top: 5px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  margin: 5px 10px;
+.remove::after {
+  content: "Remove task";
+  visibility: hidden;
+  width: 120px;
+  background-color: hsl(213, 5%, 39%);
+  color: #fff;
   text-align: center;
-  background: white;
-  cursor: pointer;
-}
-.edit::after {
-  content: "";
-  display: block;
+  letter-spacing: 1px;
+  border-radius: 6px;
+  padding: 4px 0;
+  bottom: -230%;
+  left: 10%;
   position: absolute;
-  right: 40px;
-  top: 3px;
-  width: 22px;
-  height: 22px;
-  background-image: url("images/pen.png");
-  background-size: contain;
-  background-repeat: no-repeat;
-  font-size: 16px;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-size: 14px;
 }
 
-.edit:hover {
-  background-color: #bbbbbb;
+.remove:hover::after {
+  visibility: visible;
+  opacity: 1;
+}
+
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.edit{
+  border: none;
+  background-color: var(--todo-bg);
+  margin: 0 1rem;
+}
+
+.edit:hover{
+  background-color: var(--font-color-hover);
+  border-radius: 25%;
+}
+
+.tooltip .tooltip-text {
+  visibility: hidden;
+  width: 100px;
+  background-color: hsl(213, 5%, 39%);
+  color: #fff;
+  text-align: center;
+  letter-spacing: 1px;
+  border-radius: 6px;
+  padding: 4px 0;
+  position: absolute;
+  z-index: 1;
+  bottom: -120%;
+  left: 10%;
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-family: "Josefin Sans", sans-serif;
+}
+
+.tooltip:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+.img{
+  width: 24px;
+  height: 24px;
 }
 
 .custom-dropdown {

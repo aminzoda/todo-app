@@ -103,33 +103,39 @@ document.addEventListener("DOMContentLoaded", function () {
       elem.classList.add("flex-row");
 
       elem.innerHTML = `
-      <label class="list-item">
-        <input type="checkbox" name="todoItem" ${task.isChecked ? "checked" : ""} data-index="${index}">
-        <span class="checkmark" style="background-color: ${colors[task.priority]}" title="checkbox"></span>
-        <span class="text">${task.text}</span>
-      </label>
-      <button class="edit" data-index="${index}" title="Edit task"></button>
-      <span class="remove" data-index="${index}" title="Remove task"></span>
-      <div class="custom-dropdown" title="Set priority">
-        <div class="selected-priority">${getPriorityIcon(task.priority)} ${task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}</div>
-        <div class="dropdown-options hidden">
-          ${priorities.map(priority => `
-            <div class="dropdown-option" data-value="${priority}">
-              ${getPriorityIcon(priority)} ${priority.charAt(0).toUpperCase() + priority.slice(1)}
-            </div>
-          `).join('')}
-        </div>
+    <label class="list-item">
+      <input type="checkbox" name="todoItem" ${task.isChecked ? "checked" : ""} data-index="${index}">
+      <span class="checkmark" style="background-color: ${colors[task.priority]}"></span>
+      <span class="text">${task.text}</span>
+    </label>
+    <div class="tooltip">
+      <button class="edit" data-index="${index}">
+        <span class="tooltip-text">Edit task</span>
+        <img src="images/pen.png" alt="" class="img">
+      </button>
+    </div>
+    <span class="remove" data-index="${index}"></span>
+    <div class="custom-dropdown">
+      <div class="selected-priority">${getPriorityIcon(task.priority)} ${task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}</div>
+      <div class="dropdown-options hidden">
+        ${priorities.map(priority => `
+          <div class="dropdown-option" data-value="${priority}">
+            ${getPriorityIcon(priority)} ${priority.charAt(0).toUpperCase() + priority.slice(1)}
+          </div>
+        `).join('')}
       </div>
-    `;
+    </div>
+  `;
 
       todoList.appendChild(elem);
 
       elem.querySelector(".remove").addEventListener("click", (event) => {
+        event.stopPropagation();
         removeTask(event.target.dataset.index);
       });
 
       elem.querySelector(".edit").addEventListener("click", (event) => {
-        const index = parseInt(event.target.dataset.index);
+        const index = parseInt(event.target.closest("li").querySelector("input[type='checkbox']").dataset.index);
         editTask(index);
       });
 
@@ -147,7 +153,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // Update the reference to the currently open dropdown
         openDropdown = options.classList.contains("hidden") ? null : options;
 
-        event.stopPropagation(); // Prevent the document click handler from immediately closing the dropdown
+        event.stopPropagation();
       });
 
       elem.querySelectorAll(".dropdown-option").forEach(option => {
