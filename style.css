@@ -31,6 +31,7 @@ img {
   --todo-shadow: hsl(235, 21%, 11%);
   --font-color: hsl(234, 39%, 85%);
   --font-color-hover: hsl(234, 25%, 23%);
+  --filter-of-pen: brightness(0) invert(1);;
 }
 
 .theme-light {
@@ -39,6 +40,7 @@ img {
   --todo-shadow: hsl(235, 19%, 35%);
   --font-color: hsl(236, 9%, 61%);
   --font-color-hover: hsl(0, 0%, 73%);
+  --filter-of-pen:  grayscale(1) brightness(100%);
 }
 
 body {
@@ -293,6 +295,8 @@ ul li input[type="checkbox"]:checked ~ .text {
 .img{
   width: 24px;
   height: 24px;
+  filter: var(--filter-of-pen);
+
 }
 
 .custom-dropdown {
