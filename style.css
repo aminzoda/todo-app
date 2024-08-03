@@ -30,7 +30,8 @@ img {
   --todo-bg: hsl(235, 24%, 19%);
   --todo-shadow: hsl(235, 21%, 11%);
   --font-color: hsl(234, 39%, 85%);
-  --font-color-hover: #fff;
+  --font-color-hover: hsl(234, 25%, 23%);
+  --filter-of-pen: brightness(0) invert(1);;
 }
 
 .theme-light {
@@ -38,7 +39,8 @@ img {
   --todo-bg: hsl(0, 0%, 98%);
   --todo-shadow: hsl(235, 19%, 35%);
   --font-color: hsl(236, 9%, 61%);
-  --font-color-hover: hsl(235, 21%, 11%);
+  --font-color-hover: hsl(0, 0%, 73%);
+  --filter-of-pen:  grayscale(1) brightness(100%);
 }
 
 body {
@@ -207,7 +209,7 @@ ul li input[type="checkbox"] ~ .checkmark:hover::before {
 
 ul li input[type="checkbox"]:checked ~ .checkmark {
   background: center url("images/icon-check.svg") no-repeat,
-    linear-gradient(135deg, hsl(192, 100%, 67%), hsl(280, 87%, 65%));
+grey;
 }
 
 ul li input[type="checkbox"]:checked ~ .text {
@@ -226,23 +228,122 @@ ul li input[type="checkbox"]:checked ~ .text {
   top: 25px;
 }
 
-.edit {
-  margin-left: 1rem;
-  margin-top: 4px;
-  width: 80px;
-  height: auto;
-  border: none;
-  border-radius: 5px;
-  background-color: var(--dark-grayish-blue-alt);
+.remove::after {
+  content: "Remove task";
+  visibility: hidden;
+  width: 120px;
+  background-color: hsl(213, 5%, 39%);
   color: #fff;
-  text-transform: uppercase;
-  letter-spacing: 3px;
-  font-weight: bold;
-  padding: 4px;
+  text-align: center;
+  letter-spacing: 1px;
+  border-radius: 6px;
+  padding: 4px 0;
+  bottom: -230%;
+  left: 10%;
+  position: absolute;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-size: 14px;
 }
 
-.edit:hover {
-  background-color: var(--light-grayish-blue);
+.remove:hover::after {
+  visibility: visible;
+  opacity: 1;
+}
+
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.edit{
+  border: none;
+  background-color: var(--todo-bg);
+  margin: 0 1rem;
+}
+
+.edit:hover{
+  background-color: var(--font-color-hover);
+  border-radius: 25%;
+}
+
+.tooltip .tooltip-text {
+  visibility: hidden;
+  width: 100px;
+  background-color: hsl(213, 5%, 39%);
+  color: #fff;
+  text-align: center;
+  letter-spacing: 1px;
+  border-radius: 6px;
+  padding: 4px 0;
+  position: absolute;
+  z-index: 1;
+  bottom: -120%;
+  left: 10%;
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-family: "Josefin Sans", sans-serif;
+}
+
+.tooltip:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+.img{
+  width: 24px;
+  height: 24px;
+  filter: var(--filter-of-pen);
+
+}
+
+.custom-dropdown {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  width: 130px;
+}
+
+.selected-priority:hover{
+  background-color:  #bbbbbb;
+}
+
+.selected-priority {
+  padding: 4px 12px;
+  display: flex;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  gap: 12px;
+  align-items: center;
+  background: white;
+  color: blue;
+}
+
+.dropdown-options {
+  position: absolute;
+  background: #fff;
+  border: 1px solid #ccc;
+  z-index: 10;
+  width: 100%;
+  color: black;
+}
+
+.dropdown-option {
+  cursor: pointer;
+  padding: 4px 12px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.dropdown-option:hover {
+  background-color: #bbbbbb;
+}
+
+.hidden {
+  display: none;
 }
 
 ul li:hover .remove {

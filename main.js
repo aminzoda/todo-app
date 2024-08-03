@@ -8,7 +8,15 @@ document.addEventListener("DOMContentLoaded", function () {
   const clearButton = document.querySelector(".clear");
   const filterRadios = document.querySelectorAll(".filter input");
 
+  const colors = {
+    high: "red",
+    medium: "#faa80c",
+    low: "blue",
+    none: "grey"
+  };
+  const priorities = ["high", "medium", "low", "none"];
   let tasks = [];
+  let openDropdown = null;
 
   // Initialize application state
   function init() {
@@ -39,8 +47,8 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // Task functions
-  function addTask(text, isChecked) {
-    const task = { text, isChecked };
+  function addTask(text, isChecked, priority = "none") {
+    const task = { text, isChecked, priority };
     tasks.push(task);
     render();
     saveTasks();
@@ -53,9 +61,13 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function editTask(index) {
-    const newText = prompt("Edit task", tasks[index].text);
+    const task = tasks[index];
+    if (!task) {
+      return;
+    }
+    const newText = prompt("Edit task", task.text);
     if (newText !== null) {
-      tasks[index].text = newText;
+      task.text = newText;
       render();
       saveTasks();
     }
@@ -76,6 +88,14 @@ document.addEventListener("DOMContentLoaded", function () {
     localStorage.setItem("tasks", JSON.stringify(tasks));
   }
 
+  // Function to get SVG icon
+  function getPriorityIcon(priority) {
+    return `
+    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">
+      <path d="M220-100v-760h40v80h550.77l-72.31 180 72.31 180H260v320h-40Z" fill="${colors[priority]}"/>
+    </svg>`;
+  }
+
   function render() {
     todoList.innerHTML = "";
     tasks.forEach((task, index) => {
@@ -83,25 +103,79 @@ document.addEventListener("DOMContentLoaded", function () {
       elem.classList.add("flex-row");
 
       elem.innerHTML = `
-        <label class="list-item">
-          <input type="checkbox" name="todoItem" ${task.isChecked ? "checked" : ""} data-index="${index}">
-          <span class="checkmark"></span>
-          <span class="text">${task.text}</span>
-        </label>
-        <button class="edit" data-index="${index}">Edit</button>
-        <span class="remove" data-index="${index}"></span>
-      `;
+    <label class="list-item">
+      <input type="checkbox" name="todoItem" ${task.isChecked ? "checked" : ""} data-index="${index}">
+      <span class="checkmark" style="background-color: ${colors[task.priority]}"></span>
+      <span class="text">${task.text}</span>
+    </label>
+    <div class="tooltip">
+      <button class="edit" data-index="${index}">
+        <span class="tooltip-text">Edit task</span>
+        <img src="images/pen.png" alt="" class="img">
+      </button>
+    </div>
+    <span class="remove" data-index="${index}"></span>
+    <div class="custom-dropdown">
+      <div class="selected-priority">${getPriorityIcon(task.priority)} ${task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}</div>
+      <div class="dropdown-options hidden">
+        ${priorities.map(priority => `
+          <div class="dropdown-option" data-value="${priority}">
+            ${getPriorityIcon(priority)} ${priority.charAt(0).toUpperCase() + priority.slice(1)}
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
 
-      filterTasks(elem, task);
-      todoList.append(elem);
+      todoList.appendChild(elem);
 
       elem.querySelector(".remove").addEventListener("click", (event) => {
+        event.stopPropagation();
         removeTask(event.target.dataset.index);
       });
 
       elem.querySelector(".edit").addEventListener("click", (event) => {
-        editTask(event.target.dataset.index);
+        const index = parseInt(event.target.closest("li").querySelector("input[type='checkbox']").dataset.index);
+        editTask(index);
       });
+
+      elem.querySelector(".selected-priority").addEventListener("click", (event) => {
+        const options = elem.querySelector(".dropdown-options");
+
+        // Close the previously open dropdown if it exists
+        if (openDropdown && openDropdown !== options) {
+          openDropdown.classList.add("hidden");
+        }
+
+        // Toggle the current dropdown
+        options.classList.toggle("hidden");
+
+        // Update the reference to the currently open dropdown
+        openDropdown = options.classList.contains("hidden") ? null : options;
+
+        event.stopPropagation();
+      });
+
+      elem.querySelectorAll(".dropdown-option").forEach(option => {
+        option.addEventListener("click", (event) => {
+          const selectedValue = event.currentTarget.dataset.value;
+          tasks[index].priority = selectedValue;
+
+          const selectedPriorityDiv = elem.querySelector(".selected-priority");
+          selectedPriorityDiv.innerHTML = `${getPriorityIcon(selectedValue)} ${selectedValue.charAt(0).toUpperCase() + selectedValue.slice(1)}`;
+          elem.querySelector(".checkmark").style.backgroundColor = `${colors[selectedValue]}`;
+          saveTasks();
+          render();
+        });
+      });
+
+      elem.querySelector("input[type='checkbox']").addEventListener("change", (event) => {
+        tasks[index].isChecked = event.target.checked;
+        saveTasks();
+        render();
+      });
+
+      filterTasks(elem, task);
     });
     itemsLeft.innerText = tasks.filter((task) => !task.isChecked).length;
   }
@@ -154,7 +228,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     newItemInput.addEventListener("keypress", (event) => {
-      if (event.charCode === 13 && newItemInput.value.length > 0) {
+      if (event.key === 'Enter' && newItemInput.value.length > 0) {
         addTask(newItemInput.value, false);
         newItemInput.value = "";
       }
@@ -162,17 +236,19 @@ document.addEventListener("DOMContentLoaded", function () {
 
     clearButton.addEventListener("click", clearCompletedTasks);
 
-    todoList.addEventListener("change", (event) => {
-      const index = event.target.dataset.index;
-      tasks[index].isChecked = event.target.checked;
-      render();
-      saveTasks();
-    });
-
     filterRadios.forEach((radio) => {
       radio.addEventListener("change", (e) => {
         filterTodoItems(e.target.id);
       });
+    });
+
+    // Close custom dropdown when clicking outside
+    document.addEventListener("click", (event) => {
+      const isDropdown = event.target.closest(".custom-dropdown");
+      if (!isDropdown && openDropdown) {
+        openDropdown.classList.add("hidden");
+        openDropdown = null;
+      }
     });
   }
 
