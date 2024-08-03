@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const addNewItemButton = document.querySelector(".add-new-item");
   const clearButton = document.querySelector(".clear");
   const filterRadios = document.querySelectorAll(".filter input");
+  const searchInput = document.getElementById("search");
 
   const colors = {
     high: "red",
@@ -91,41 +92,47 @@ document.addEventListener("DOMContentLoaded", function () {
   // Function to get SVG icon
   function getPriorityIcon(priority) {
     return `
-    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">
-      <path d="M220-100v-760h40v80h550.77l-72.31 180 72.31 180H260v320h-40Z" fill="${colors[priority]}"/>
-    </svg>`;
+        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">
+            <path d="M220-100v-760h40v80h550.77l-72.31 180 72.31 180H260v320h-40Z" fill="${colors[priority]}"/>
+        </svg>`;
   }
 
   function render() {
     todoList.innerHTML = "";
+    const searchTerm = searchInput.value.toLowerCase();
+
     tasks.forEach((task, index) => {
+      if (!task.text.toLowerCase().includes(searchTerm)) {
+        return;
+      }
+
       const elem = document.createElement("li");
       elem.classList.add("flex-row");
 
       elem.innerHTML = `
-    <label class="list-item">
-      <input type="checkbox" name="todoItem" ${task.isChecked ? "checked" : ""} data-index="${index}">
-      <span class="checkmark" style="background-color: ${colors[task.priority]}"></span>
-      <span class="text">${task.text}</span>
-    </label>
-    <div class="tooltip">
-      <button class="edit" data-index="${index}">
-        <span class="tooltip-text">Edit task</span>
-        <img src="images/pen.png" alt="" class="img">
-      </button>
-    </div>
-    <span class="remove" data-index="${index}"></span>
-    <div class="custom-dropdown">
-      <div class="selected-priority">${getPriorityIcon(task.priority)} ${task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}</div>
-      <div class="dropdown-options hidden">
-        ${priorities.map(priority => `
-          <div class="dropdown-option" data-value="${priority}">
-            ${getPriorityIcon(priority)} ${priority.charAt(0).toUpperCase() + priority.slice(1)}
-          </div>
-        `).join('')}
-      </div>
-    </div>
-  `;
+            <label class="list-item">
+                <input type="checkbox" name="todoItem" ${task.isChecked ? "checked" : ""} data-index="${index}">
+                <span class="checkmark" style="background-color: ${colors[task.priority]}"></span>
+                <span class="text">${task.text}</span>
+            </label>
+            <div class="tooltip">
+                <button class="edit" data-index="${index}">
+                    <span class="tooltip-text">Edit task</span>
+                    <img src="images/pen.png" alt="" class="img">
+                </button>
+            </div>
+            <span class="remove" data-index="${index}"></span>
+            <div class="custom-dropdown">
+                <div class="selected-priority">${getPriorityIcon(task.priority)} ${task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}</div>
+                <div class="dropdown-options hidden">
+                    ${priorities.map(priority => `
+                        <div class="dropdown-option" data-value="${priority}">
+                            ${getPriorityIcon(priority)} ${priority.charAt(0).toUpperCase() + priority.slice(1)}
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+            `;
 
       todoList.appendChild(elem);
 
@@ -250,6 +257,8 @@ document.addEventListener("DOMContentLoaded", function () {
         openDropdown = null;
       }
     });
+
+    searchInput.addEventListener("input", render);
   }
 
   // Initialize the application
