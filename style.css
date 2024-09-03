@@ -225,6 +225,25 @@ ul li input[type="checkbox"]:checked ~ .text {
   top: 25px;
 }
 
+.edit {
+  margin-left: 10rem;
+  margin-top: 4px;
+  width: 80px;
+  height: auto;
+  border: none;
+  border-radius: 5px;
+  background-color: var(--dark-grayish-blue-alt);
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  font-weight: bold;
+  padding: 4px;
+}
+
+.edit:hover {
+  background-color: var(--light-grayish-blue);
+}
+
 ul li:hover .remove {
   display: block;
 }
@@ -313,5 +332,9 @@ ul li:hover .remove {
 
   .filter label {
     padding-top: 4px;
+  }
+
+  .edit {
+    margin-left: 9rem;
   }
 }
