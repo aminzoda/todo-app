@@ -1,4 +1,3 @@
-// Initialize the application when the DOM is fully loaded
 document.addEventListener("DOMContentLoaded", () => {
   const elements = {
     theme: document.getElementById("theme"),
@@ -18,7 +17,6 @@ document.addEventListener("DOMContentLoaded", () => {
   store.loadTasks();
 });
 
-// Store class to manage tasks and state
 class Store {
   constructor() {
     this.state = {
@@ -27,56 +25,70 @@ class Store {
       searchTerm: '',
       theme: localStorage.getItem('theme') || 'dark',
     };
+
+    // Proxy handler for the whole state
+    const handler = {
+      set: (target, property, value) => {
+        target[property] = value;
+        this.notify();
+        return true;
+      }
+    };
+
+    // Create a Proxy for the state
+    this.proxyState = new Proxy(this.state, handler);
+
+    // Create a Proxy for the tasks array separately
+    this.proxyTasks = new Proxy(this.state.tasks, {
+      set: (target, property, value) => {
+        target[property] = value;
+        this.saveTasks();
+        this.notify(); // Trigger re-render when tasks change
+        return true;
+      }
+    });
   }
 
   getState() {
-    return this.state;
+    return this.proxyState;
   }
 
   updateState(key, value) {
-    this.state[key] = value;
-    this.notify();
+    this.proxyState[key] = value;
   }
 
   addTask(text, isChecked = false, priority = 'none') {
-    this.state.tasks.push({ text, isChecked, priority });
-    this.saveTasks();
-    this.notify();
+    this.proxyTasks.push({ text, isChecked, priority }); // Use proxyTasks to trigger reactivity
   }
 
   removeTask(index) {
-    this.state.tasks.splice(index, 1);
-    this.saveTasks();
-    this.notify();
+    this.proxyTasks.splice(index, 1); // Use proxyTasks
   }
 
   editTask(index, newText) {
     if (newText) {
-      this.state.tasks[index].text = newText;
-      this.saveTasks();
-      this.notify();
+      this.proxyTasks[index].text = newText; // Use proxyTasks
     }
   }
 
   toggleTask(index) {
-    this.state.tasks[index].isChecked = !this.state.tasks[index].isChecked;
+    this.proxyTasks[index].isChecked = !this.proxyTasks[index].isChecked; // Use proxyTasks
     this.saveTasks();
     this.notify();
   }
 
   clearCompletedTasks() {
-    this.state.tasks = this.state.tasks.filter(task => !task.isChecked);
+    this.proxyState.tasks = this.proxyState.tasks.filter(task => !task.isChecked); // Proxy should catch this
     this.saveTasks();
-    this.notify();
   }
 
   loadTasks() {
-    this.state.tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-    this.notify();
+    const savedTasks = JSON.parse(localStorage.getItem('tasks')) || [];
+    savedTasks.forEach(task => this.proxyTasks.push(task)); // Load tasks through proxy to maintain reactivity
   }
 
   saveTasks() {
-    localStorage.setItem('tasks', JSON.stringify(this.state.tasks));
+    localStorage.setItem('tasks', JSON.stringify(this.proxyTasks)); // Save proxyTasks
   }
 
   notify() {
@@ -88,7 +100,6 @@ class Store {
   }
 }
 
-// Component class to handle UI rendering and event binding
 class Component {
   constructor(store, elements) {
     this.store = store;
@@ -133,7 +144,7 @@ class Component {
   render() {
     const { todoList, itemsLeft } = this.elements;
     const { tasks, filter, searchTerm, theme } = this.store.getState();
-    const colors = { high: "red", medium: "#faa80c", low: "blue", none: "grey" };
+    const colors = { high: "red", medium: "orange", low: "blue", none: "grey" };
     const priorities = ["high", "medium", "low", "none"];
 
     document.body.className = theme === 'light' ? 'theme-light' : 'theme-dark';
@@ -198,9 +209,18 @@ class Component {
         taskElem.querySelectorAll(".dropdown-option").forEach(option => {
           option.addEventListener("click", (event) => {
             const selectedValue = event.currentTarget.dataset.value;
-            this.store.state.tasks[index].priority = selectedValue;
+
+            // Update the state properly using updateState
+            this.store.updateState('tasks', this.store.getState().tasks.map((task, taskIndex) => {
+              if (taskIndex === index) {
+                task.priority = selectedValue;  // Update the priority
+              }
+              return task;
+            }));
+
             selectedPriorityDiv.innerHTML = `${this.getPriorityIcon(selectedValue, colors)} ${selectedValue.charAt(0).toUpperCase() + selectedValue.slice(1)}`;
             taskElem.querySelector(".checkmark").style.backgroundColor = `${colors[selectedValue]}`;
+
             this.store.saveTasks();
             this.store.notify();
           });
